@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "614114539893",
+    "project_id": "mostdelicious",
+    "storage_bucket": "mostdelicious.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:614114539893:android:2ffb72758f8e1f244cbb3c",
+        "android_client_info": {
+          "package_name": "com.example.mostdelicious"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIqw77FyN0WIHEjTVGUCFa7Uex9fbpabg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_main"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.mostdelicious.ui.main.HomeFragment"
+        android:label="HomeFragment"
+        tools:layout="@layout/fragment_home">
+
+    </fragment>
+
+    <action
+        android:id="@+id/action_global_toPostFragment"
+        app:destination="@id/mealPostFragment" />
+    <fragment
+        android:id="@+id/mealPostFragment"
+        android:name="com.example.mostdelicious.ui.main.post.MealPostFragment"
+        android:label="MealPostFragment"
+        tools:layout="@layout/fragment_meal_post" />
+</navigation>

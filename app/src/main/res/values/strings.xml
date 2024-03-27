@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">MostDelicious</string>
+    <string name="full_name">Full name</string>
+    <string name="email_address">Email address</string>
+    <string name="password">Password</string>
+    <string name="already_have_an_account_sign_in_now">Already have an account ? Sign in now</string>
+    <string name="register">Register</string>
+    <string name="please_enter_your_details">Please enter your details</string>
+    <string name="don_t_have_an_account_sign_up_now">Don\'t have an account? Sign up now!</string>
+    <string name="login">Login</string>
+    <string name="please_enter_post_details">Please enter post details</string>
+    <string name="meal_name">Meal name</string>
+    <string name="enter_your_comment_content">Enter your comment content</string>
+    <string name="share_post">Share post</string>
+    <string name="click_the_photo_to_open_gallery">Click the photo to open gallery</string>
+</resources>
