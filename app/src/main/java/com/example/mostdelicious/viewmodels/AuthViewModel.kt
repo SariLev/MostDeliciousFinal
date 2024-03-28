@@ -5,88 +5,76 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mostdelicious.database.common.UserRepository
-import com.example.mostdelicious.database.remote.FirebaseUserManager
 import com.example.mostdelicious.dto.UserRegisterForm
 import com.example.mostdelicious.helpers.LoadingState
-import com.example.mostdelicious.models.User
+import com.example.mostdelicious.ui.util.AuthListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val repository: UserRepository) : ViewModel() {
-
-    val currentUser = repository.getCurrentUser()
+class AuthViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
 
     private var _exceptions = MutableLiveData<Exception?>()
     val exceptions: LiveData<Exception?> get() = _exceptions
 
+    val currentUser = userRepository.listenCurrentUser()
+
     private var _loadingState = MutableLiveData<LoadingState>(LoadingState.Loaded)
     val loadingState: LiveData<LoadingState> get() = _loadingState
 
-    private var userDocumentListener: ListenerRegistration? = null
-    private val authListener: FirebaseAuth.AuthStateListener =
-        FirebaseAuth.AuthStateListener { userAuth ->
-            if (userAuth.currentUser != null) {
-                userDocumentListener?.remove()
+    // active current user listener
+    // updates whenever the current user is updated
+    private val authListener = AuthListener(viewModelScope, userRepository)
+        .apply { attach() }
 
-                userDocumentListener = FirebaseFirestore.getInstance()
-                    .collection(FirebaseUserManager.USER_COLLECTION_PATH)
-                    .document(userAuth.currentUser!!.uid)
-                    .addSnapshotListener { value, error ->
-                        if (value != null) {
-                            val user = value.toObject(User::class.java)
-                            if (user != null) {
-                                viewModelScope.launch {
-                                    repository.cacheUserLocally(user)
-                                }
-                            }
-                        }
-                    }
-            } else {
-                userDocumentListener?.remove()
-            }
-        }
-
-    init {
-        FirebaseAuth.getInstance().addAuthStateListener(authListener)
-    }
-
-    fun createUser(form: UserRegisterForm) {
+    fun createUser(form: UserRegisterForm, positiveCallback: () -> Unit) {
         viewModelScope.launch {
             try {
                 // now loading
                 _loadingState.postValue(LoadingState.Loading)
-                val user = repository.createUser(form)
-                // stop loading
-                _loadingState.postValue(LoadingState.Loaded)
+                val user = userRepository.createUser(form)
+                positiveCallback()
             } catch (e: Exception) {
                 _exceptions.postValue(e)
+            } finally {
+                // stop loading
+                _loadingState.postValue(LoadingState.Loaded)
             }
         }
     }
 
-    fun signIn(email: String, password: String) {
+    fun signIn(email: String, password: String, positiveCallback: () -> Unit) {
         viewModelScope.launch {
             try {
                 // now loading
                 _loadingState.postValue(LoadingState.Loading)
-                repository.signIn(email, password)
-                // stop loading
-                _loadingState.postValue(LoadingState.Loaded)
+                userRepository.signIn(email, password)
+                positiveCallback()
             } catch (e: Exception) {
                 _exceptions.postValue(e)
+            } finally {
+                // stop loading
+                _loadingState.postValue(LoadingState.Loaded)
             }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        userDocumentListener?.remove()
-        FirebaseAuth.getInstance().removeAuthStateListener(authListener)
+        authListener.detach()
+    }
+
+    fun logOut() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                userRepository.logOut()
+            }
+        }
     }
 
 }

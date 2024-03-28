@@ -13,4 +13,7 @@
     <string name="enter_your_comment_content">Enter your comment content</string>
     <string name="share_post">Share post</string>
     <string name="click_the_photo_to_open_gallery">Click the photo to open gallery</string>
+    <string name="feed">Feed</string>
+    <string name="profile">Profile</string>
+    <string name="logout">Logout</string>
 </resources>

@@ -9,7 +9,7 @@ import com.example.mostdelicious.models.MealPost
 import com.example.mostdelicious.models.OtherUser
 import com.example.mostdelicious.models.User
 
-@Database(entities = [User::class, OtherUser::class, MealPost::class], version = 3)
+@Database(entities = [User::class, OtherUser::class, MealPost::class], version = 5)
 @TypeConverters(Converters::class)
 abstract class AppLocalDB : RoomDatabase() {
 

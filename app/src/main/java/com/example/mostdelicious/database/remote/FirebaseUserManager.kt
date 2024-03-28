@@ -1,9 +1,10 @@
 package com.example.mostdelicious.database.remote
 
+import android.util.Log
 import com.example.mostdelicious.dto.UserRegisterForm
-import com.example.mostdelicious.helpers.getAsync
-import com.example.mostdelicious.helpers.listenToAll
-import com.example.mostdelicious.models.MealPost
+import com.example.mostdelicious.helpers.extensions.LAST_UPDATED_KEY
+import com.example.mostdelicious.helpers.extensions.getAsync
+import com.example.mostdelicious.helpers.extensions.listenToAll
 import com.example.mostdelicious.models.OtherUser
 import com.example.mostdelicious.models.User
 import com.google.firebase.auth.FirebaseAuth
@@ -29,11 +30,31 @@ class FirebaseUserManager {
 
 
     fun listenToAllUsers(
-        callback: (List<OtherUser>) -> Unit,
+        lastUpdated: Long,
+        callback: (List<OtherUser>?) -> Unit,
     ): ListenerRegistration {
         return FirebaseFirestore.getInstance()
             .collection(USER_COLLECTION_PATH)
-            .listenToAll(callback)
+            .whereGreaterThanOrEqualTo(LAST_UPDATED_KEY, lastUpdated - 10 * 1000 * 60)
+            .listenToAll {
+                callback(it)
+            }
+    }
+
+    suspend fun saveUser(user: User): User = withContext(Dispatchers.IO) {
+        val deferred = CompletableDeferred<User>() // Create a Completable
+        user.lastUpdated = System.currentTimeMillis()
+        FirebaseFirestore.getInstance()
+            .collection(USER_COLLECTION_PATH)
+            .document(user.id)
+            .set(user)
+            .addOnSuccessListener {
+                deferred.complete(user)
+            }
+            .addOnFailureListener {
+                deferred.completeExceptionally(it)
+            }
+        deferred.await()
     }
 
     suspend fun createUser(form: UserRegisterForm) = withContext(Dispatchers.IO) {

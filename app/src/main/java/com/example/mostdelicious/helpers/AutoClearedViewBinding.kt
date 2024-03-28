@@ -17,26 +17,8 @@ class AutoClearedViewBinding<T : ViewBinding>(
     private var binding: T? = null
 
     init {
-        fragment.lifecycle.addObserver(object : LifecycleEventObserver {
-            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                if (event == Lifecycle.Event.ON_DESTROY) {
-                    binding = null
-                }
-            }
-        })
-    }
-
-    override fun getValue(thisRef: Fragment, property: KProperty<*>): T {
-        binding?.let { return it }
-
-        val lifecycle = fragment.viewLifecycleOwner.lifecycle
-        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED)) {
-            throw IllegalStateException("Should not attempt to get bindings when Fragment views are destroyed.")
-        }
-
-        return inflater(fragment.layoutInflater, null, false).also {
-            this.binding = it
-            fragment.viewLifecycleOwner.lifecycle.addObserver(object : LifecycleEventObserver {
+        fragment.viewLifecycleOwnerLiveData.observe(fragment) { viewLifecycleOwner ->
+            viewLifecycleOwner?.lifecycle?.addObserver(object : LifecycleEventObserver {
                 override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                     if (event == Lifecycle.Event.ON_DESTROY) {
                         binding = null
@@ -45,5 +27,14 @@ class AutoClearedViewBinding<T : ViewBinding>(
             })
         }
     }
-}
 
+    override fun getValue(thisRef: Fragment, property: KProperty<*>): T {
+        binding?.let { return it }
+
+        if (!fragment.viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED)) {
+            throw IllegalStateException("Should not attempt to get bindings when Fragment views are destroyed.")
+        }
+
+        return inflater.invoke(fragment.layoutInflater, null, false).also { binding = it }
+    }
+}

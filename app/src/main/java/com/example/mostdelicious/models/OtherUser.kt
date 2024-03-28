@@ -1,8 +1,7 @@
 package com.example.mostdelicious.models
 
 import androidx.room.Entity
-import com.example.mostdelicious.helpers.EMPTY_VALUE
-import kotlinx.serialization.Serializable
+import com.example.mostdelicious.helpers.extensions.EMPTY_VALUE
 
 @Entity(tableName = "other_users")
 class OtherUser(

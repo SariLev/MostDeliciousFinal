@@ -1,6 +1,8 @@
 package com.example.mostdelicious.di
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import com.example.mostdelicious.database.common.PostRepository
 import com.example.mostdelicious.database.common.UserRepository
 import com.example.mostdelicious.database.local.AppLocalDB
@@ -37,11 +39,18 @@ class SharedModule {
 
     @Singleton
     @Provides
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("com.example.mostdelicious", MODE_PRIVATE)
+    }
+
+    @Singleton
+    @Provides
     fun provideUserRepository(
         localDatabase: AppLocalDB,
-        remoteDatabase: FirebaseUserManager
+        remoteDatabase: FirebaseUserManager,
+        sharedPreferences: SharedPreferences
     ): UserRepository {
-        return UserRepository(localDatabase, remoteDatabase)
+        return UserRepository(localDatabase, remoteDatabase, sharedPreferences)
     }
 
 
@@ -49,8 +58,9 @@ class SharedModule {
     @Provides
     fun providePostRepository(
         localDatabase: AppLocalDB,
-        remoteDatabase: FirebasePostManager
+        remoteDatabase: FirebasePostManager,
+        sharedPreferences: SharedPreferences
     ): PostRepository {
-        return PostRepository(localDatabase, remoteDatabase)
+        return PostRepository(localDatabase, remoteDatabase, sharedPreferences)
     }
 }

@@ -10,28 +10,24 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
 import com.example.mostdelicious.MainActivity
 import com.example.mostdelicious.R
 import com.example.mostdelicious.databinding.FragmentMealPostBinding
 import com.example.mostdelicious.dto.PostDto
-import com.example.mostdelicious.helpers.LoadingState
-import com.example.mostdelicious.helpers.viewBinding
-import com.example.mostdelicious.models.MealPost
-import com.example.mostdelicious.viewmodels.AuthViewModel
-import com.example.mostdelicious.viewmodels.MainViewModel
+import com.example.mostdelicious.helpers.extensions.setDebouncedOnClickListener
+import com.example.mostdelicious.helpers.extensions.typedActivity
+import com.example.mostdelicious.helpers.extensions.viewBinding
 import com.example.mostdelicious.viewmodels.PostViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MealPostFragment : Fragment() {
-    private val binding by viewBinding<FragmentMealPostBinding>()
-    private val authViewModel by activityViewModels<AuthViewModel>()
+    private val binding by viewBinding(FragmentMealPostBinding::inflate)
     private val postViewModel by activityViewModels<PostViewModel>()
-    private val mainViewModel by activityViewModels<MainViewModel>()
 
-    var uri: Uri? = null
+    private var uri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,14 +48,14 @@ class MealPostFragment : Fragment() {
                 }
             }
         }
-        binding.btnSharePost.setOnClickListener {
+        binding.btnSharePost.setDebouncedOnClickListener {
             if (uri == null) {
                 Toast.makeText(
                     requireContext(),
                     "You must choose an image to post",
                     Toast.LENGTH_SHORT
                 ).show()
-                return@setOnClickListener
+                return@setDebouncedOnClickListener
             }
             val mealName = binding.etPostTitle.text.toString()
             val mealContent = binding.etPostContent.text.toString()
@@ -78,7 +74,7 @@ class MealPostFragment : Fragment() {
 
         postViewModel.loadingState.observe(
             viewLifecycleOwner,
-            (requireActivity() as MainActivity)::setLoading
+            typedActivity<MainActivity>()::setLoading
         )
 
     }

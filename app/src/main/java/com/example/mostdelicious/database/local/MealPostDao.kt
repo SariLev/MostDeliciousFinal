@@ -16,16 +16,16 @@ interface MealPostDao {
     suspend fun insert(meals: List<MealPost>)
 
     @Query("SELECT * from meal_posts WHERE postUserId = :id")
-    fun listenUserMeals(id: String): LiveData<List<MealPost>>
+    fun listenUserPosts(id: String): LiveData<List<MealPost>>
 
     @Query("DELETE FROM meal_posts WHERE id NOT IN (:idsToKeep)")
     suspend fun deleteAllExcept(idsToKeep: List<String>)
 
     @Query("SELECT * from meal_posts")
-    fun listenAllMeals(): LiveData<List<MealPost>>
+    fun listenAllPosts(): LiveData<List<MealPost>>
 
     @Query("DELETE from meal_posts")
-    suspend fun deleteAllMeals() : Int
+    suspend fun deleteAllPosts() : Int
 
     @Query("SELECT * from meal_posts")
     suspend fun getAll(): List<MealPost>
