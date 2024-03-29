@@ -12,6 +12,8 @@ import com.example.mostdelicious.MainActivity
 import com.example.mostdelicious.R
 import com.example.mostdelicious.helpers.AutoClearedViewBinding
 import com.example.mostdelicious.ui.main.HomeFragmentDirections
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

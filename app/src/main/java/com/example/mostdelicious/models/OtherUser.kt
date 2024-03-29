@@ -8,4 +8,6 @@ class OtherUser(
     id: String = EMPTY_VALUE,
     email: String = EMPTY_VALUE,
     name: String = EMPTY_VALUE,
-) : User(id, email, name)
+    favoriteMeals: MutableList<String> = mutableListOf(),
+    ratedPosts: MutableList<String> = mutableListOf(),
+) : User(id, email, name, favoriteMeals, ratedPosts)

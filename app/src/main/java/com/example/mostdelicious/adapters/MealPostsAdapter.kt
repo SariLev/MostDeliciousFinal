@@ -21,6 +21,7 @@ class MealPostsAdapter(
     userLikedPosts: List<String> = listOf(),
     private val onRatingClicked: (MealPost) -> Unit,
     private val onLikeButtonClick: (MealPost) -> Unit,
+    private val onRecipeRequest: ((MealPost) -> Unit)? = null,
 ) : RecyclerView.Adapter<MealPostsAdapter.MealPostViewHolder>() {
 
     private var userMap: Map<String, User> = allUsers.associateBy(User::id)
@@ -36,6 +37,7 @@ class MealPostsAdapter(
             postOwner: User,
             currentUser: User,
             isLikedByUser: Boolean,
+            onRecipeRequest: ((MealPost) -> Unit)?,
         ) {
             Picasso.get()
                 .load(post.image)
@@ -67,10 +69,16 @@ class MealPostsAdapter(
                 View.VISIBLE
             }
 
-            Log.d("Rating: ", currentUser.ratedPosts.size.toString())
+            onRecipeRequest?.let { request ->
+                binding.btnGetRecipe.visibility = View.VISIBLE
 
+                binding.btnGetRecipe.setOnClickListener {
+                    request.invoke(post)
+                }
+            } ?: run {
+                binding.btnGetRecipe.visibility = View.GONE
+            }
             binding.btnRatePost.isEnabled = !currentUser.ratedPosts.contains(post.id)
-
         }
 
     }
@@ -101,6 +109,7 @@ class MealPostsAdapter(
             postOwner = user,
             currentUser = currentUser,
             isLikedByUser = isLikedByCurrentUser,
+            onRecipeRequest
         )
     }
 

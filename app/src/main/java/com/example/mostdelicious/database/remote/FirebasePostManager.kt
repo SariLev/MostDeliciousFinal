@@ -47,7 +47,7 @@ class FirebasePostManager @Inject constructor() {
     }
 
 
-    suspend fun ratePost(post: MealPost, rating: Float): MealPost = withContext(Dispatchers.IO) {
+    suspend fun ratePost(post: MealPost, rating: Float, callback: (MealPost) -> Unit): MealPost = withContext(Dispatchers.IO) {
         val deferred = CompletableDeferred<MealPost>()
         val userId = FirebaseAuth.getInstance().uid ?: return@withContext post
         val currentAverageRating = post.averageRating
@@ -72,6 +72,7 @@ class FirebasePostManager @Inject constructor() {
             .update(updateFields)
             .addOnSuccessListener {
                 deferred.complete(post)
+                callback(post)
             }
             .addOnFailureListener {
                 deferred.completeExceptionally(it)

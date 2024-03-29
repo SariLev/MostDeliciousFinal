@@ -14,7 +14,9 @@ import com.example.mostdelicious.adapters.MealPostsAdapter
 import com.example.mostdelicious.databinding.FragmentProfileBinding
 import com.example.mostdelicious.helpers.LoadingState
 import com.example.mostdelicious.helpers.extensions.viewBinding
+import com.example.mostdelicious.models.MealPost
 import com.example.mostdelicious.ui.dialog.RatingDialog
+import com.example.mostdelicious.ui.dialog.RecipeDialog
 import com.example.mostdelicious.viewmodels.AuthViewModel
 import com.example.mostdelicious.viewmodels.MainViewModel
 import com.example.mostdelicious.viewmodels.PostViewModel
@@ -57,7 +59,8 @@ class ProfileFragment : Fragment() {
                         Snackbar.make(binding.root, "Rated post! (:", Snackbar.LENGTH_SHORT).show()
                     }
                 }.show(childFragmentManager, "Rating dialog")
-            }
+            },
+            onRecipeRequest = ::recipeRequest
         )
         binding.rvPosts.adapter = adapter
 
@@ -68,6 +71,13 @@ class ProfileFragment : Fragment() {
                 mainViewModel.loadingState.postValue(LoadingState.Loaded)
             }
         }
+    }
+
+
+    private fun recipeRequest(post: MealPost) {
+        postViewModel.recipeRequest(post)
+        RecipeDialog(viewLifecycleOwner, postViewModel.recipeLiveData)
+            .show(childFragmentManager, "Recipe dialog")
     }
 
 

@@ -60,11 +60,10 @@ class UserRepository(
 
     suspend fun cacheUserLocally(user: User) = withContext(Dispatchers.IO) {
         localDatabase.userDao().insert(user)
-        localDatabase.otherUserDao().insert(OtherUser(user.id, user.email, user.name))
+        localDatabase.otherUserDao().insert(OtherUser(user.id, user.email, user.name, user.favoriteMeals, user.ratedPosts))
     }
 
     private suspend fun cacheUsersLocally(users: List<OtherUser>) = withContext(Dispatchers.IO) {
-        localDatabase.userDao().insert(users)
         localDatabase.otherUserDao().insert(users)
     }
 
@@ -94,7 +93,7 @@ class UserRepository(
     }
 
     @Throws(Exception::class)
-    suspend fun signIn(email: String, password: String) {
+    suspend fun signIn(email: String, password: String) = withContext(Dispatchers.IO) {
         localDatabase.userDao().deleteCurrentUser()
         remoteDatabase.signIn(email, password)
     }
@@ -104,7 +103,7 @@ class UserRepository(
         FirebaseAuth.getInstance().signOut()
     }
 
-    suspend fun saveUser(user: User) {
+    suspend fun saveUser(user: User) = withContext(Dispatchers.IO) {
         remoteDatabase.saveUser(user)
     }
 

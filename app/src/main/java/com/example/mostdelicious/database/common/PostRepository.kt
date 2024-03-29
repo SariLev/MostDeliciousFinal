@@ -6,8 +6,11 @@ import com.example.mostdelicious.database.local.AppLocalDB
 import com.example.mostdelicious.database.remote.FirebasePostManager
 import com.example.mostdelicious.dto.PostDto
 import com.example.mostdelicious.helpers.FirebaseLiveData
+import com.example.mostdelicious.helpers.RecipeRequest
 import com.example.mostdelicious.helpers.nullIfEmpty
+import com.example.mostdelicious.models.ApiResponse
 import com.example.mostdelicious.models.MealPost
+import com.example.mostdelicious.models.MealsResponse
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,13 +32,24 @@ class PostRepository(
     }
 
     suspend fun ratePost(
+        coroutineScope: CoroutineScope,
         post: MealPost,
         rating: Float,
     ) = withContext(Dispatchers.IO) {
-        remoteDatabase.ratePost(post, rating)
-        localDatabase.mealPostsDao().insert(post)
+        remoteDatabase.ratePost(post, rating)  {
+            coroutineScope.launch {
+                withContext(Dispatchers.IO) {
+                    localDatabase.mealPostsDao().insert(post)
+                }
+            }
+        }
     }
 
+
+    suspend fun recipeRequest(post: MealPost): ApiResponse<MealsResponse> {
+        val request = RecipeRequest(post.name)
+        return request.get()
+    }
 
     fun listenAllPosts(
         coroutineScope: CoroutineScope,
