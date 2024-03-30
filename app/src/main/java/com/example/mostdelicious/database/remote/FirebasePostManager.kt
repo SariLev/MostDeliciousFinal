@@ -47,39 +47,41 @@ class FirebasePostManager @Inject constructor() {
     }
 
 
-    suspend fun ratePost(post: MealPost, rating: Float, callback: (MealPost) -> Unit): MealPost = withContext(Dispatchers.IO) {
-        val deferred = CompletableDeferred<MealPost>()
-        val userId = FirebaseAuth.getInstance().uid ?: return@withContext post
-        val currentAverageRating = post.averageRating
+    suspend fun ratePost(post: MealPost, rating: Float, callback: (MealPost) -> Unit): MealPost =
+        withContext(Dispatchers.IO) {
+            val deferred = CompletableDeferred<MealPost>()
+            val userId = FirebaseAuth.getInstance().uid ?: return@withContext post
+            val currentAverageRating = post.averageRating
 
-        val ratingUsers = post.ratingUsers
+            val ratingUsers = post.ratingUsers
 
-        val sumAllRatings = currentAverageRating * ratingUsers.size
+            val sumAllRatings = currentAverageRating * ratingUsers.size
 
-        ratingUsers.add(userId)
+            ratingUsers.add(userId)
 
-        val newRatingAverage = (sumAllRatings + rating) / (ratingUsers.size)
+            val newRatingAverage = (sumAllRatings + rating) / (ratingUsers.size)
 
-        val updateFields = mutableMapOf<String, Any>()
-        updateFields[LAST_UPDATED_KEY] = System.currentTimeMillis()
+            val updateFields = mutableMapOf<String, Any>()
+            updateFields[LAST_UPDATED_KEY] = System.currentTimeMillis()
+            post.lastUpdated = System.currentTimeMillis()
+            post.averageRating = newRatingAverage
+            updateFields[MealPost.AVERAGE_RATING_KEY] = newRatingAverage
+            updateFields[MealPost.RATING_USERS_KEY] = ratingUsers
 
-        updateFields[MealPost.AVERAGE_RATING_KEY] = newRatingAverage
-        updateFields[MealPost.RATING_USERS_KEY] = ratingUsers
+            FirebaseFirestore.getInstance()
+                .collection(POSTS_COLLECTION_DB_PATH)
+                .document(post.id)
+                .update(updateFields)
+                .addOnSuccessListener {
+                    deferred.complete(post)
+                    callback(post)
+                }
+                .addOnFailureListener {
+                    deferred.completeExceptionally(it)
+                }
 
-        FirebaseFirestore.getInstance()
-            .collection(POSTS_COLLECTION_DB_PATH)
-            .document(post.id)
-            .update(updateFields)
-            .addOnSuccessListener {
-                deferred.complete(post)
-                callback(post)
-            }
-            .addOnFailureListener {
-                deferred.completeExceptionally(it)
-            }
-
-        deferred.await()
-    }
+            deferred.await()
+        }
 
     suspend fun createUpdatePost(form: PostDto): MealPost = withContext(Dispatchers.IO) {
         val deferred = CompletableDeferred<MealPost>()

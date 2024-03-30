@@ -2,6 +2,7 @@ package com.example.mostdelicious.database.common
 
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import com.example.mostdelicious.database.local.AppLocalDB
 import com.example.mostdelicious.database.remote.FirebasePostManager
 import com.example.mostdelicious.dto.PostDto
@@ -36,7 +37,7 @@ class PostRepository(
         post: MealPost,
         rating: Float,
     ) = withContext(Dispatchers.IO) {
-        remoteDatabase.ratePost(post, rating)  {
+        remoteDatabase.ratePost(post, rating) {
             coroutineScope.launch {
                 withContext(Dispatchers.IO) {
                     localDatabase.mealPostsDao().insert(post)
@@ -71,6 +72,11 @@ class PostRepository(
             localDatabase.mealPostsDao()
                 .listenAllPosts()
                 .nullIfEmpty()
+                .map {
+                    it?.sortedByDescending { meal ->
+                        meal.createdAt
+                    }
+                }
         )
     }
 
